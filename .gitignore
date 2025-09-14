@@ -1,30 +1,86 @@
-.gitignore:
-
-# Python
+# PYTHON
 *.pyc
 *.pyo
 *.pyd
 __pycache__/
 *.so
 .Python
+positive_env/
 env/
 venv/
 .venv/
 pip-log.txt
 pip-delete-this-directory.txt
+*.egg-info/
+build/
+*.spec
 
-# IDE/Editor files
+# IDE/EDITOR FILES
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+# *.sublime-project
+# *.sublime-workspace
 
-# OS files
+# OS FILES
 .DS_Store
 Thumbs.db
 desktop.ini
+# .directory
+# *.tmp
 
-# Project specific
+# PROJECT SPECIFIC
 *.log
 .env
+.env.local
+# config.ini
+# secrets.txt
+# *.key
+# *.pem
+
+# DATABASES
+# *.db
+# *.sqlite
+# *.sqlite3
+
+# DOCUMENTATION/MEDIA (uncomment if needed)
+# *.pdf
+# *.docx
+# *.xlsx
+# *.pptx
+# *.png
+# *.jpg
+# *.gif
+# *.mp4
+
+# BUILD TOOLS/PACKAGE MANAGERS (uncomment if using)
+# node_modules/
+# package-lock.json
+# yarn.lock
+# .npm
+# .yarn/
+# Pipfile.lock
+# poetry.lock
+# requirements-dev.txt
+
+# TESTING/COVERAGE (uncomment if using)
+# .pytest_cache/
+# .coverage
+# htmlcov/
+# .tox/
+# .nox/
+# coverage.xml
+
+# DEPLOYMENT/DOCKER (uncomment if using)
+# Dockerfile
+# docker-compose.yml
+# .dockerignore
+# *.tar
+# *.zip
+
+# CLOUD/AWS (uncomment if using)
+# .aws/
+# *.pem
+# *.p12

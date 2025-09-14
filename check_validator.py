@@ -9,6 +9,9 @@ DATE_WINDOW_DAYS = 60
 def validate_csv(file_path):
     errors = []
     check_numbers = {}  # Dict: check_num -> line_num for duplicates
+    account_totals = {}  # Dict: account -> total amount
+    check_counts = {'issued': 0, 'voided': 0}  # Count of I vs C checks
+    total_amount = 0.0
     
     try:
         # Try opening with ASCII encoding to enforce no special chars
@@ -64,6 +67,18 @@ def validate_csv(file_path):
                     amount_float = float(cleaned_amount)
                     if amount_float <= 0:
                         errors.append(f"Line {line_num}: Amount '{amount}' must be positive.")
+                    else:
+                        # Track statistics only for valid amounts
+                        if acct not in account_totals:
+                            account_totals[acct] = 0.0
+                        account_totals[acct] += amount_float
+                        total_amount += amount_float
+
+                        # Count check types
+                        if check_type.upper() == 'I':
+                            check_counts['issued'] += 1
+                        elif check_type.upper() == 'C':
+                            check_counts['voided'] += 1
                 except ValueError:
                     errors.append(f"Line {line_num}: Invalid amount '{amount}' (must be a number with optional decimal).")
                 
@@ -83,12 +98,21 @@ def validate_csv(file_path):
     except Exception as e:
         errors.append(f"Unexpected error: {str(e)}")
     
-    return errors
+    # Create summary statistics
+    summary = {
+        'account_totals': account_totals,
+        'total_amount': total_amount,
+        'checks_issued': check_counts['issued'],
+        'checks_voided': check_counts['voided'],
+        'total_checks': check_counts['issued'] + check_counts['voided']
+    }
+
+    return errors, summary
 
 def select_file():
     file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
     if file_path:
-        errors = validate_csv(file_path)
+        errors, summary = validate_csv(file_path)
         text_area.config(state=tk.NORMAL)
         text_area.delete(1.0, tk.END)
         if errors:
@@ -97,8 +121,29 @@ def select_file():
             messagebox.showerror("Validation Errors", f"{len(errors)} errors found! See details below.")
             save_btn.pack(pady=10)  # Show save button
         else:
-            text_area.insert(tk.END, "No errors found.")
-            messagebox.showinfo("Success", "CSV is valid! No errors found.")
+            # Display success message with summary
+            success_text = "✓ CSV VALIDATION SUCCESSFUL\n\n"
+            success_text += "SUMMARY REPORT:\n"
+            success_text += "=" * 50 + "\n\n"
+
+            # Account totals
+            if summary['account_totals']:
+                success_text += "ACCOUNT TOTALS:\n"
+                for account, total in sorted(summary['account_totals'].items()):
+                    success_text += f"  Account {account}: ${total:,.2f}\n"
+                success_text += "\n"
+
+            # Grand total
+            success_text += f"TOTAL AMOUNT (ALL ACCOUNTS): ${summary['total_amount']:,.2f}\n\n"
+
+            # Check counts
+            success_text += "CHECK SUMMARY:\n"
+            success_text += f"  Checks Added (I): {summary['checks_issued']}\n"
+            success_text += f"  Checks Voided (C): {summary['checks_voided']}\n"
+            success_text += f"  Total Checks: {summary['total_checks']}\n"
+
+            text_area.insert(tk.END, success_text)
+            messagebox.showinfo("Success", f"CSV is valid! {summary['total_checks']} checks processed.")
             save_btn.pack_forget()  # Hide save button
         text_area.config(state=tk.DISABLED)
         global current_errors
